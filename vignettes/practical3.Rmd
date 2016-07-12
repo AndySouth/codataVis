@@ -1,0 +1,108 @@
+---
+title: "Practical 3"
+author: "Colin Gillespie"
+output: rmarkdown::html_vignette
+---
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Practical 3}
+-->
+
+
+```{r, echo=FALSE, message=FALSE}
+library(ggplot2)
+data(aphids, package="codataVis")
+echo=FALSE;results="hide"
+```
+
+## The aphids data set
+
+This data set consists of seven observations on cotton aphid counts on twenty
+randomly chosen leaves in each plot, for twenty-seven treatment-block
+combinations. 
+```{r, echo=FALSE}
+data(aphids, package="codataVis")
+```
+The data were recorded in July 2004 in Lamesa, Texas. The
+treatments consisted of three nitrogen levels (blanket, variable and none),
+three irrigation levels (low, medium and high) and three blocks, each being a
+distinct area. Irrigation treatments were randomly assigned within each block as
+whole plots. Nitrogen treatments were randomly assigned within each whole block
+as split plots.
+
+The sampling times are once per week. 
+
+Reproduce
+
+```{r echo=FALSE, fig.width=6, fig.height=6}
+aphids$Block = as.character(aphids$Block)
+ggplot(data=aphids) + 
+  geom_point(aes(Time, Aphids, colour=Block)) +
+  facet_grid(Nitrogen ~ Water) + 
+  geom_line(aes(Time, Aphids, colour=Block)) + 
+  theme_bw()
+```
+
+Here are some hints to get you started. 
+The key idea is to think of the plot in terms of layers. 
+
+  * The plot contains a combination of `geom_line` and `geom_point`.
+  * Is `Block` a character or a numeric?
+  * You can change the x-axis label using 
+    ```{r eval=FALSE, tidy=FALSE}
+    + xlab("Time")
+    ```
+  * Change the theme using `theme_bw()`
+
+## The Beauty data set
+
+First load the beauty data set
+```{r}
+data(Beauty, package="codataVis")
+```
+
+In practical 1, we split data up by both gender and age:
+
+```{r echo=1:3, fig.cap="Stacked bar chart of the Beauty data set.", fig.width=5}
+Beauty$dec = signif(Beauty$age, 1)
+g = ggplot(data=Beauty)
+g1 = g + geom_bar(aes(x=gender, fill=factor(dec)))
+g1
+```
+
+Rather than using the `fill` aesthetic, redo the plot but use `facet_grid` and `facet_wrap`. For example, 
+
+```{r fig.keep='none'}
+g2 = g + geom_bar(aes(x=gender)) + facet_grid(. ~ dec)
+```
+
+Experiment with:
+
+  * the `margins` argument
+```{r fig.keep='none', echo=echo, results=results}
+g + geom_bar(aes(x=gender)) + facet_grid(. ~ dec, margins=TRUE)
+```
+
+  * the `scales=`free_y'} argument 
+    ```{r fig.keep='none', echo=echo, results=results}
+    ## Notice that the females have disappeared from the "70" facet.
+    ## Probably not what we wanted.
+    g + geom_bar(aes(x=gender)) + facet_grid(. ~ dec, scales="free_x")
+    ```
+
+  * the layout, i.e. column or row.
+    ```{r fig.keep='none', echo=echo, results=results}
+    g + geom_bar(aes(x=gender)) + facet_grid(dec ~.)
+    ```
+
+How would you change the panel labels?
+```{r fig.keep='none', echo=echo, results=results}
+##Relabel the factor
+Beauty$dec = factor(Beauty$dec, 
+                    labels=c("Thirties", "Forties", "Fifties", "Sixties", "Seventies"))
+
+## Plot as before
+ggplot(data=Beauty) + 
+  geom_bar(aes(x=gender)) + 
+  facet_grid(dec ~.)
+```

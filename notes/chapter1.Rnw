@@ -1,0 +1,202 @@
+\chapter{Background}
+
+\section{Installing packages}
+
+Installing packages in R is straightforward. To install a package from the
+command line we use the \cc{install.packages} command, i.e.
+
+<<echo=TRUE, eval=FALSE>>=
+install.packages("ggplot2")
+library("ggplot2")
+@
+
+
+
+\section{Types of R graphics}
+
+\subsection{Base graphics}
+
+Base graphics were written by Ross Ihaka based on his experience of implementing
+the S graphics driver. If you have created a histogram, scatter plot or boxplot,
+you've probably used base graphics. Base graphics are generally fast, but have
+limited scope. For example, you can only draw on top of the plot and cannot edit
+or alter existing graphics. For example, if you combine the \cc{plot} and
+\cc{points} commands, you have to work out the $x$- and $y$- limits before
+adding the points.
+
+\subsection{Grid graphics}
+
+Grid graphics were developed by Paul Murrell\cite{Murrell2011}. Grid grobs
+(graphical objects) can be represented independently of the plot and modified
+later. The viewports system makes it easier to construct complex plots. Grid
+doesn't provide tools for graphics, it provides primitives for creating plots.
+Lattice and ggplot2 graphics use grid.
+
+\subsection{Lattice graphics}
+
+The lattice package uses grid graphics to implement the trellis graphics
+system\cite{Sarkar2008}. It produces nicer plots than base graphics and legends
+are automatically generated. I initially started using lattice before
+\cc{ggplot2}. However, I found it a bit confusing and so switched to
+\cc{ggplot2}.
+
+\subsection{ggplot2 graphics}
+
+\cc{ggplot2} started in 2005\cite{Wickham2009} and follows the ``Grammar of
+Graphics''\sidenote{We'll come on to that later.} Like \cc{lattice},
+\cc{ggplot2} uses grid to draw graphics, which means you can exercise low-level
+control over the plot appearance.
+
+\section{Data sets}
+
+Throughout the course, we will use a few different datasets.
+
+\subsection{Fuel economy data}
+
+This dataset includes car make, model, class, engine size and fuel economy for a
+selection of US cars in 1999 and 2008. It is included with the \cc{ggplot2}
+package\sidenote{The data originally comes from the EPA fuel economy website,
+  \url{http://fueleconomy.gov}} and is loaded using the \cc{data} function:
+
+<<message=FALSE>>= 
+data(mpg, package="ggplot2")
+@ 
+
+\noindent Table \ref{T1.1} gives the last five cars in this data set.
+
+\begin{table}[t]
+  \resizebox{\textwidth}{!}{%
+  \centering
+  \begin{tabular}{@{}lllllllll@{}}
+    \toprule
+manufacturer & model & displ & year & cyl & trans & cty & hwy&     class\\
+\midrule
+volkswagen & passat & 2.0 & 2008 & 4 &   auto(s6) & 19 & 28 & midsize\\
+volkswagen & passat & 2.0 & 2008 & 4 & manual(m6) & 21 & 29 & midsize\\
+volkswagen & passat & 2.8 & 1999 & 6 &   auto(l5) & 16 & 26 & midsize\\
+volkswagen & passat & 2.8 & 1999 & 6 & manual(m5) & 18 & 26 & midsize\\
+volkswagen & passat & 3.6 & 2008 & 6 &   auto(s6) & 17 & 26 & midsize\\
+\bottomrule
+\end{tabular}}
+\caption{The last five cars in the \cc{mpg} dataset. The variables
+  \cc{cty} and \cc{hwy} record miles per gallon for city and highway driving
+  respectively. The variable \cc{displ} is the engine displacement in litres.}\label{T1.1}
+\end{table}
+
+
+\subsection{The tips data set}\label{tips}
+<<echo=FALSE>>=
+data(tips, package="reshape2")
+@ 
+
+A single waiter recorded information about each tip he received over a few
+months while working in a particular restaurant. He collected data on several
+variables
+\begin{itemize}
+\item tip(\$),
+\item bill(\$),
+\item gender of the bill payer,
+\item whether there were smokers in the party,
+\item day of the week\sidenote{The waiter only worked Thursday, Friday, Saturday
+    and Sundays.}
+\item time of day,
+\item party size.
+\end{itemize}
+There were a total of 244 tips. The first few rows of this data set are shown in
+table \ref{T1.2}.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{@{}lllllll@{}}
+    \toprule
+    total\_bill &  tip &   sex &smoker & day &  time & size\\
+    \midrule
+    16.99 & 1.01 & Female & No & Sun & Dinner & 2 \\
+    10.34 & 1.66 & Male   & No & Sun & Dinner & 3 \\
+    21.01 & 3.50 & Male   & No & Sun & Dinner & 3 \\
+    23.68 & 3.31 & Male   & No & Sun & Dinner & 2 \\
+    24.59 & 3.61 & Female & No & Sun & Dinner & 4 \\
+    \bottomrule
+  \end{tabular}
+  \caption{The first five rows of the \cc{tips} data set. There are
+    \Sexpr{nrow(tips)} rows in this data set.}\label{T1.2}
+\end{table}
+The data comes with the \cc{reshape2} package and is loaded using the \cc{data}
+function:
+
+<<>>=
+data(tips, package="reshape2")
+@ 
+
+\subsection{Movie data set}\label{Movie}
+
+The internet movie database\sidenote{\url{http://imdb.com/}} is a website
+devoted to collecting movie data supplied by studios and fans. It claims to be
+the biggest movie database on the web and is run by amazon. More information
+about IMDB can be found online at
+\begin{center}
+  \url{http://imdb.com/help/show_leaf?about}
+\end{center}
+including information about the data collection process\marginnote{IMDB makes
+  their raw data available at \url{http://uk.imdb.com/interfaces/}.}
+\begin{center}
+  \url{http://imdb.com/help/show_leaf?infosource}
+\end{center}
+Example rows are given in table \ref{T1.1}. This data set contains information
+on over 50,000 movies. We will use this dataset to illustrate the concepts
+covered in this class.\marginnote{This is the full version of the data set used in
+  the Introduction to R course.}
+
+The dataset contains the following fields:
+\begin{itemize}
+\item Title. Title of the movie.
+\item Year. Year of release.
+\item Budget. Total budget in US dollars. If the budget isn't known, then it is stored as `-1'.
+\item Length. Length in minutes.
+\item Rating. Average IMDB user rating.
+\item Votes. Number of IMDB users who rated this movie.
+\item r1. The percentage (to the nearest 10\%) of users who
+  rated this movie a 1.
+\item r2 -- r10: Similar to r1.
+\item mpaa. The MPAA rating - PG, PG-13, R, NC-17.
+\item Action, Animation, Comedy, Drama, Documentary, Romance, Short. Binary variables representing if movie was classified as belonging to that genre. A movie can belong to more one genre. See for example the film \textit{Ablaze} in table \ref{T1.5}.
+\end{itemize}
+This data set is part of the \cc{ggplot2movies} package:
+
+<<>>=
+data(movies, package="ggplot2movies")
+@ 
+
+
+\begin{table*}[t]
+  \resizebox{\textwidth}{!}{%
+\centering
+\begin{tabular}{@{}l lll lllcl llllllll @{}}
+\toprule
+&&&& \multicolumn{5}{l}{\large Voting statistics} & \multicolumn{8}{l}{\large Movie genre} \\
+\cmidrule(l){10-17}
+\cmidrule(lr){5-9}
+Title                   & Year & Length & Budget & Rating & Votes     & r1 & ... & r10 & mpaa & Action & Animation & Comedy & Drama & Documentary & Romance & Short \\
+\midrule
+A.k.a. Cassius      & 1970 & 85     & -1        & 5.7 & 43      & 4.5   & ... & 14.5 & PG & 0 & 0 & 0 & 0 & 1 & 0 & 0\\
+AKA                     & 2002 & 123    & -1        & 6.0 & 335     & 24.5  & ... & 14.5 & R  &  0  &  0  &  0 & 1 & 0 & 0 & 0\\
+Alien Vs. Pred      & 2004 & 102    & 45000000  & 5.4 & 14651   & 4.5   & ... & 4.5  & PG-13  &  1  &  0  &  0 & 0 & 0 & 0 & 0\\
+Abandon                 & 2002 & 99     & 25000000  & 4.7 & 2364    & 4.5   & ... & 4.5 & PG-13  &  0  &  0  &  0 & 1 & 0 & 0 & 0\\
+Abendland               & 1999 & 146    & -1        & 5.0 & 46      & 14.5  & ... & 24.5 & R  &  0  &  0  &  0 & 0 & 0 & 0 & 0\\
+Aberration              & 1997 & 93     & -1        & 4.8 & 149     & 14.5  & ... & 4.5 & R  &  0  &  0  &  0 & 0 & 0 & 0 & 0 \\
+Abilene                 & 1999 & 104    & -1        & 4.9 & 42      & 0.0   & ... & 24.5 & PG & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+Ablaze                  & 2001 & 97     & -1        & 3.6 & 98      & 24.5  & ... & 14.5 & R     & 1 & 0 & 0 & 1 & 0 & 0 & 0\\
+Abominable Dr  & 1971 & 94  & -1        & 6.7 & 1547    & 4.5   & ... & 14.5 & PG-13 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+About Adam              & 2000 & 105    & -1        & 6.4 & 1303    & 4.5  & ... & 4.5  & R     & 0 & 0 & 1 & 0 & 0 & 1 & 0 \\
+\bottomrule
+\end{tabular}}
+\caption{Sample rows of the movie data set. \textbf{Credit:} This data set was initially constructed by Hadley Wickham at~\url{http://had.co.nz/}.}\label{T1.5}
+\end{table*}
+
+\begin{figure}[b]
+\centering
+\includegraphics[]{convincing}
+\caption{\url{http://xkcd.com/833/}}
+\end{figure}
+
+ 

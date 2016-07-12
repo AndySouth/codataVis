@@ -1,0 +1,66 @@
+\documentclass[a4paper,justified,openany]{tufte-book}
+%\usepackage{Rcolour}
+% uncomment this line if you prefer colored hyperlinks (e.g., for onscreen viewing)
+\hypersetup{colorlinks}
+\usepackage{microtype}
+\usepackage{amsmath,amsfonts}
+\usepackage{booktabs, comment}% For nicely typeset tabular material
+% For graphics / images
+\setkeys{Gin}{width=\linewidth,totalheight=\textheight,keepaspectratio}
+
+% Prints argument within hanging parentheses (i.e., parentheses that take
+% up no horizontal space).  Useful in tabular environments.
+\newcommand{\hangp}[1]{\makebox[0pt][r]{(}#1\makebox[0pt][l]{)}}
+
+% Prints an asterisk that takes up no horizontal space.
+% Useful in tabular environments.
+% Prints a trailing space in a smart way.
+\usepackage{xspace}
+\usepackage{units}
+<<echo=FALSE>>=
+knitr::opts_knit$set(self.contained=FALSE)
+knitr::opts_chunk$set(
+  comment = "#>",
+  collapse = TRUE,
+  cache = TRUE, 
+  fig.align="center",
+  fig.pos="t"
+)
+@
+
+\setcounter{secnumdepth}{2}
+\newcommand{\cc}{\texttt}
+
+% Book metadata
+\title{Advanced R Graphics} 
+\author[Dr Colin S. Gillespie]{Dr Colin S.  Gillespie}
+\graphicspath{{graphics/}}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\input quote
+
+<<chapter1, child='chapter1.Rnw'>>=
+@
+<<chapter2, child='chapter2.Rnw'>>=
+@
+<<chapter3, child='chapter3.Rnw'>>=
+@
+<<chapter4, child='chapter4.Rnw'>>=
+@
+
+<<chapter5, child='chapter5.Rnw'>>=
+@
+
+\backmatter
+\appendix
+<<chapter5, child='appendix1.Rnw'>>=
+@ 
+
+\bibliographystyle{plainnat}
+\bibliography{RCourse}
+
+
+\end{document}

@@ -1,0 +1,47 @@
+---
+title: "Practical 4"
+author: "Colin Gillespie"
+output: rmarkdown::html_vignette
+---
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Practical 4}
+-->
+  
+## The Google data set
+
+```{r echo=FALSE, message=FALSE}
+library("ggplot2")
+data(google, package="codataVis")
+g = ggplot(google) + 
+  geom_point(aes(Rank, Users), alpha=0.2) +
+  scale_y_log10(limit=c(1e0, 1e9))  + 
+  facet_grid(Advertising~.) + 
+  geom_point(data=subset(google, Category=="Social Networks"), 
+             aes(Rank, Users), colour="violetred2",  size=2) + theme_bw()
+```
+  
+Google recently released a data set of the top 1000 websites
+
+```{r}
+data(google, package="codataVis")
+```
+
+The data set contains the following categories: 
+
+```{r echo=FALSE}
+knitr::kable(head(google))
+```
+
+1. Create a scatter of plot of \cc{Rank} and \cc{Views}.
+2. Using \cc{scale\_y\_log10()} transform the \cc{y} scale.
+3. Uses facets to split the plot by its advertising status.
+4. Use another `geom_point()` layer to highlight the `Social Networks` sites. 
+5. Add `theme_bw()` to change the background theme.
+6. Using `ggplotly` from the **plotly** package to create an html version.
+
+```{r echo=FALSE, message=FALSE, width=600}
+library(plotly)
+
+ggplotly(g, width=600, height=400)
+```

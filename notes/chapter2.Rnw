@@ -1,0 +1,274 @@
+% !TeX root = lecture.Rnw 
+
+\chapter{\cc{ggplot2} overview}
+
+\cc{ggplot2} is a bit different from other graphics packages. It roughly follows
+the \textit{philosophy} of Wilkinson, 1999.\cite{Wilkinson1999} Essentially, we
+think about plots as layers. By thinking of graphics in terms of layers it is
+easier for the user to iteratively add new components and for a developer to add
+new functionality.
+
+\section{A basic plot using base graphics}
+
+<<echo=FALSE, cache=FALSE>>=
+library(ggplot2)
+data(mpg, package="ggplot2")
+pdf("graphics/figure2_1.pdf", width=5, height=5)
+plot(mpg[mpg$cyl==4,]$displ, mpg[mpg$cyl==4,]$cty, 
+     xlim=c(1,8), ylim=c(5,35))
+points(mpg[mpg$cyl==5,]$displ, mpg[mpg$cyl==5,]$cty, col=2)
+points(mpg[mpg$cyl==6,]$displ, mpg[mpg$cyl==6,]$cty, col=3)
+points(mpg[mpg$cyl==8,]$displ, mpg[mpg$cyl==8,]$cty, col=4)
+sink=dev.off()
+system("pdfcrop graphics/figure2_1.pdf")
+
+g = ggplot(data=mpg, aes(x=displ, y=cty)) 
+p = g + geom_point(aes(colour=factor(cyl)))
+pdf("graphics/figure2_2.pdf", width=6, height=5)
+print(p)
+sink=dev.off()
+system("pdfcrop graphics/figure2_2.pdf")
+@ 
+
+A reasonable first attempt at analysing the mpg data set would be to produce a scatter
+plot of (for example), engine displacement against city miles per gallon. To use
+\cc{base} graphics, we would first construct a basic scatter plot of the data
+where the cylinder size is 4:\sidenote{We've cheated here and pretended that we
+  know the x- and y- limits.}
+
+<<fig.keep='none', tidy=FALSE, cache=TRUE>>=
+plot(mpg[mpg$cyl==4,]$displ, mpg[mpg$cyl==4,]$cty, 
+     xlim=c(1, 8), ylim=c(5, 35))
+@ 
+
+\noindent Next we add in the other cars corresponding to different cylinder sizes:
+
+<<eval=FALSE, tidy=FALSE, cache=TRUE>>=
+points(mpg[mpg$cyl==5,]$displ, mpg[mpg$cyl==5,]$cty, 
+       col=2)
+points(mpg[mpg$cyl==6,]$displ, mpg[mpg$cyl==6,]$cty, 
+       col=3)
+points(mpg[mpg$cyl==8,]$displ, mpg[mpg$cyl==8,]$cty, 
+       col=4)
+@ 
+
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure2_1-crop}
+  \caption{A scatter plot of engine displacement vs average city miles per gallon.
+    The coloured points correspond to different cylinder sizes. The plot was
+    constructed using \cc{base} graphics.}\label{F2.1}
+\end{marginfigure}
+
+\noindent This would produce figure \ref{F2.1}. A few points to note:
+\begin{itemize}
+\item We have to manually set the scales in the \cc{plot} command using
+  \cc{xlim} and \cc{ylim}.
+\item We haven't created a legend. We would need to use the \cc{legend} function.
+\item The default axis labels are terrible - \cc{mpg[mpg\$cyl==4,]\$displ}
+\item If we wanted to look at highway miles per gallon, this is a bit of a pain.
+\end{itemize}
+Let's now consider the equivalent \cc{ggplot2} graphic - figure \ref{F2.2}.
+After loading the necessary library, the plot is generated using the following code:
+
+<<fig.keep='none', cache=TRUE>>=
+g = ggplot(data=mpg, aes(x=displ, y=cty))
+g + geom_point(aes(colour=factor(cyl)))
+@ 
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Plot Name & Geom  & Base graphic \\
+    \midrule
+    Barchart & bar  & \cc{barplot}\\
+    Box-and-whisker & boxplot & \cc{boxplot}\\
+    Histogram & histogram  & \cc{hist} \\
+    Line plot & line & \cc{plot} and \cc{lines}\\
+    Scatter plot & point & \cc{plot} and \cc{points}\\
+    \bottomrule
+  \end{tabular}
+  \caption[4\baselineskip]{Basic \cc{geom}'s and their corresponding standard plot names.}\label{T2.1}
+\end{table}
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure2_2-crop}
+  \caption{As figure \ref{F2.1}, but created using \cc{ggplot2}.}\label{F2.2}
+\end{marginfigure}
+
+The \cc{ggplot2} code is fundamentally different from the \cc{base} code. The
+\cc{ggplot} function sets the default data set, and attributes called
+\textbf{aesthetics}. The aesthetics are properties that are perceived on the
+graphic. A particular aesthetic can be mapped to a variable or set to a constant
+value. In figure \ref{F2.2}, the variable \cc{displ} is mapped to the x-axis and
+\cc{cty} variable is mapped to the y-axis. 
+
+The other function, \cc{geom\_point} adds a layer to the plot. The \cc{x} and
+\cc{y} variables are inherited (in this case) from the first function, \cc{ggplot}, and
+the colour aesthetic is set to the \cc{cyl} variable. Other possible aesthetics
+are, for example, size, shape and transparency. In figure \ref{F2.2} these
+additional aesthetics are left at their default value.
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure2_3-crop}
+  \caption{As figure \ref{F2.2}, but where the size aesthetic depends on
+    cylinder size.}\label{F2.3}
+\end{marginfigure}
+  
+This approach is very powerful and enables us to easily create complex graphics.
+For example, we could create a plot where the size of the points depends on an
+additional factor:
+
+<<cache=TRUE, warning=FALSE>>=
+p = g + geom_point(aes(size=factor(cyl)))
+@ 
+
+<<echo=FALSE, warning=FALSE>>=
+pdf("graphics/figure2_3.pdf", width=4, height=3)
+print(p)
+sink=dev.off()
+system("pdfcrop graphics/figure2_3.pdf")
+@ 
+
+\noindent which gives figure \ref{F2.3} or we could create a line chart
+
+<<tidy=FALSE, cache=TRUE, warning=FALSE>>=
+p = g + geom_line(
+  aes(colour=factor(cyl), size = factor(cyl)))
+@
+
+<<echo=FALSE, warning=FALSE>>=
+pdf("graphics/figure2_4.pdf", width=4, height=3)
+print(p)
+sink=dev.off()
+system("pdfcrop graphics/figure2_4.pdf")
+@ 
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure2_4-crop}
+  \caption{As figure \ref{F2.2}, but using \cc{geom\_line}.}\label{F2.4}
+\end{marginfigure}
+
+\noindent to get figure \ref{F2.4}. Of course, figures \ref{F2.3} and \ref{F2.4} aren't
+particular good plots, they just illustrate the general idea.
+
+Points, bars and lines are all examples of \textbf{geom}'s or geometric objects.
+Typically, if we use a single \cc{geom}, we get a standard plot. Table
+\ref{T2.1} summarises some standard geoms and their equivalent base graphic
+counter part. 
+
+However using the idea of a graphical grammar, we can construct more
+complicated functions. For example, this code
+
+<<tidy=FALSE, warning=FALSE, results="hide">>=
+p = g + geom_point(aes(colour=factor(cyl))) +
+  stat_smooth(aes(colour=factor(cyl)))
+@ 
+
+<<echo=FALSE, results='hide', warning=FALSE, message=FALSE>>=
+ppi = 1200
+png("graphics/figure2_5.png", width=4*ppi, height=3*ppi, res=ppi)
+print(p)
+sink=dev.off()
+#system("pdfcrop graphics/figure2_5.pdf")
+@
+
+\noindent produces figure \ref{F2.5}, which doesn't really have a simple name.
+   
+\begin{marginfigure}
+  \centering
+  \includegraphics[width=\textwidth]{figure2_5.png}
+  \caption{As figure \ref{F2.2}, but with loess regression lines.}\label{F2.5}
+\end{marginfigure}
+
+\newthought{In each} \cc{ggplot2} command, we are adding (multiple) layers. A single layer
+comprises of four elements:
+\begin{itemize}
+\item an aesthetic and data mapping;
+\item a statistical transformation (\textbf{stat});
+\item a geometric object (\textbf{geom});
+\item and a position adjustment, i.e. how should objects that overlap be handled.
+\end{itemize}
+When we use the command
+
+<<fig.keep='none', cache=TRUE>>=
+g + geom_point(aes(colour=factor(cyl)))
+@ 
+
+\noindent this is actually a shortcut for the command:
+
+<<fig.keep='none', cache=TRUE>>=
+g + layer(
+     data = mpg,#inherited
+     mapping = aes(color=factor(cyl)),#x,y are inherited
+     stat = "identity",
+     geom = "point",
+     position = "identity",
+     params = list(na.rm=FALSE)
+)
+@ 
+    
+\noindent In practice, we \textbf{never} use the layer function. Instead, we use
+\begin{itemize}
+\item \cc{geom\_*} which creates a layer with an emphasis on the \cc{geom};
+\item \cc{stat\_*} which create a layer with an emphasis on the \cc{stat};
+  \item \cc{qplot} which creates a ggplot and a layer.\marginnote{\cc{qplot} is
+      short for quick plot. I don't cover \cc{qplot} in this course. If you find
+    yourself using \cc{ggplot2} a lot, then it is worth the time investment.}  
+\end{itemize}
+  
+    
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{rabbit.jpg}
+  \caption{Remember: always label your axes.}
+\end{marginfigure}
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

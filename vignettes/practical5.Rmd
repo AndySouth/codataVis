@@ -1,0 +1,35 @@
+---
+title: "Practical 5"
+author: "Colin Gillespie"
+output: html_vignette
+---
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Practical 5}
+-->
+
+
+## Exercise 1
+
+Go through the following widgets
+
+  * Interactive Heat Maps: [d3heatmap](d3heatmap.html), [R](d3heatmap.R), [Rmd](d3heatmap.Rmd)
+  * Interactive tables: [DT](DT.html), [R](DT.R), [Rmd](DT.Rmd)
+  * Circle Plots with Bundled Edges: [edgebundleR](edgebundleR.html), [R](edgebundleR.R), [Rmd](edgebundleR.Rmd)
+  * Formattable Data Structures: [formattable](formattable.html), [R](formattable.R), [Rmd](formattable.Rmd)
+  * Interactive ggplot2 graphs: [ggiraph](ggiraph.html), [R](ggiraph.R), [Rmd](ggiraph.Rmd)
+  * Network graphs: [networkD3](networkD3.html), [R](networkD3.R), [Rmd](networkD3.Rmd)
+  * Add pan and zoom to graphics: [svgPanZoom](svgPanZoom.html), [R](svgPanZoom.R), [Rmd](svgPanZoom.Rmd)
+
+Experiment with a few of the widgets on your **own** data set.
+
+## Exercise 2
+
+Open the `htmlwidgets` vignette
+
+```{r eval=FALSE}
+vignette("htmlwidgets", package="codataVis")
+```
+
+Explore the **other widgets** on you own data. The `plotly` framework, under _Entire plotting frameworks_ is quite nice
+

@@ -1,0 +1,172 @@
+% !TeX root = lecture.Rnw 
+\chapter{Facets}
+
+\section{Introduction}
+
+Faceting is a mechanism for automatically laying out multiple plots on a page.
+The data is split into subsets, with each subset plotted onto a different panel.
+\cc{ggplot2} has two types of faceting:
+\begin{itemize}
+\item \cc{facet\_grid}: produces a 2d panel of plots where variables define rows
+  and columns.
+\item \cc{facet\_wrap}: produces a 1d ribbon of panels which can be wrapped into
+  2d.
+\end{itemize}
+
+\section{Facet grid}
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[width=\textwidth]{figure3_12-crop}
+  \caption{A histogram of movie length.}\label{F3.12}
+\end{marginfigure}
+
+The function \cc{facet\_grid} lays out the plots in a 2d grid. The faceting
+formula specifies the variables that appear in the columns and rows. Suppose we
+are interested in movie length. A first plot we could generate is a basic
+histogram:
+
+<<echo=FALSE>>=
+data(movies, package="ggplot2movies")
+@
+
+<<fig.keep='none', cache=TRUE, tidy=FALSE>>=
+g = ggplot(movies, aes(x=length)) +  xlim(0, 200) +
+  geom_histogram(aes(y=..density..), binwidth=3)
+@ 
+
+\noindent This produces figure \ref{F3.12}. Notice that we have altered the
+x-axis since there are a couple of outlying films and adjusted the binwidth in
+the histogram. We have also used density as the y-axis scale. This just means that the area under the histogram sums to one. The data is clearly bimodal. Some movies are fairly short, whilst
+others have an average length of around one hundred minutes.
+
+We will now use faceting to explore the data further.
+\begin{itemize}
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure3_13-crop}
+  \caption{Movie length conditional on whether it is a comedy.}\label{F3.13}
+\end{marginfigure}
+\item \cc{y $\sim$ .}: a single column with multiple rows. This can be handy for
+  double column journals. For example, to create histograms conditional on
+  whether they are comedy films, we use:
+
+<<fig.keep='none', tidy=FALSE, cache=TRUE, warning=FALSE>>=
+g + facet_grid(Comedy ~ .)
+@ 
+
+This gives figure \ref{F3.13}. 
+\item \cc{. $\sim$ x}: a single row with multiple columns. Very useful in
+  wide screen monitors. In this piece of code, we create histograms conditional on whether the movie was animated:
+  
+<<fig.keep='none', cache=TRUE, warning=FALSE, tidy=FALSE, warning=FALSE>>=
+g + facet_grid(. ~ Animation) 
+@ 
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure3_14-crop}
+  \caption{Histograms of movie length conditional on animation.}
+  \label{F3.14}
+\end{marginfigure}
+
+From figure \ref{F3.14}, it's clear that the majority of short films are
+animations. For illustration purposes, we have used the \cc{geom\_density}
+function in figure \ref{F3.14}.
+\item \cc{y $\sim$ x}: multiple rows and columns. Typically the variable with
+  the greatest number of factors is used for the columns. We can also add
+  marginal plots when using \cc{facet\_grid}. By default, \cc{margin=FALSE}.
+  
+<<fig.keep='none', cache=TRUE, tidy=FALSE, warning=FALSE>>=
+g + facet_grid(Comedy ~ Animation) 
+@ 
+
+Figure \ref{F3.15} splits movie length by comedy and animation. The panel labels aren't that helpful - they are either \cc{0} or \cc{1}. By default \cc{ggplot2} uses the values set in the data frame. Typically I use more
+descriptive names in my data frame so the default is more appropriate.
+\end{itemize}
+
+\begin{figure}[!h]
+  \centering
+  \includegraphics[width=0.6\textwidth]{figure3_15-crop}
+  \caption{Movie length conditional on animation and action status.}
+  \label{F3.15}
+\end{figure}
+
+\subsection{Controlling facet scales}
+
+For both \cc{facet\_grid} and \cc{facet\_wrap} we can allow the scale to be the
+same in all panels (fixed) or vary between panels. This is controlled by the
+\cc{scales} parameter in the \cc{facet\_*} function:
+\begin{itemize}
+\item \cc{scales = `fixed'}: x and y scales are fixed across all panels (default).
+\item \cc{scales = `free'}: x and y scales vary across all panels.
+\item \cc{scales = `free\_x'}: the x scale is free.
+\item \cc{scales = `free\_y}:  the y scale is free.
+\end{itemize}
+We will experiment with these in the practical session.
+
+\section{Facet wrap}
+
+<<echo=FALSE, message=FALSE>>=
+library(plyr)
+@
+
+The \cc{facet\_wrap} function creates a 1d ribbon of plots. This can be quite
+handy when trying to save space. To illustrate, let's examine movie length by
+decade. First, we a create new variable for the movie decade:\sidenote{The
+  function \cc{round\_any} is part of the \cc{plyr} package.}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figure3_16-crop}
+  \caption{Movie length conditional on the decade the movie was created. }
+  \label{F3.16}
+\end{figure}
+
+<<cache=TRUE>>=
+movies$decade = round_any(movies$year, 10, floor)
+@ 
+
+\noindent Then to generate the ribbon of histograms histograms, we use the
+\cc{facet\_wrap} function:
+
+<<fig.keep='none', cache=TRUE, tidy=FALSE, warning=FALSE, message=FALSE>>=
+ggplot(movies, aes(x=length)) + geom_histogram() + 
+  facet_wrap( ~ decade, ncol=6) + xlim(0, 200)
+@ 
+
+\noindent to figure \ref{F3.16}. As before, we truncate the x-axis. Since we have counts on the y-axis,
+we notice that the number of movies made has increased through time. Also,
+shorter movies were popular in the 1950's and 1960's.
+
+
+<<echo=FALSE, cache=TRUE, warning=FALSE, message=FALSE>>=
+pdf("graphics/figure3_12.pdf", width=5, height=5)
+print(g)
+sink=dev.off()
+system("pdfcrop graphics/figure3_12.pdf")
+
+pdf("graphics/figure3_13.pdf", width=5, height=7)
+print(g + geom_histogram(aes(y=..density..), binwidth=3) + 
+  facet_grid(Comedy ~ .))
+sink=dev.off()
+system("pdfcrop graphics/figure3_13.pdf")
+
+pdf("graphics/figure3_14.pdf", width=5, height=5)
+print(g + facet_grid(. ~ Animation))
+sink=dev.off()
+system("pdfcrop graphics/figure3_14.pdf")
+
+pdf("graphics/figure3_15.pdf", width=5, height=5)
+print(g + facet_grid(Comedy ~ Animation))
+sink=dev.off()
+system("pdfcrop graphics/figure3_15.pdf")
+
+pdf("graphics/figure3_16.pdf", width=7, height=5)
+movies$decade = signif(movies$year, 3)
+ggplot(movies, aes(x=length)) + geom_histogram() + 
+  facet_wrap(~decade, ncol=6) + xlim(0, 200)
+sink=dev.off()
+system("pdfcrop graphics/figure3_16.pdf")
+@ 
+ 

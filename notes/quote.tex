@@ -1,0 +1,25 @@
+% !TeX root = lecture.Rnw 
+
+% Prints an epigraph and speaker in sans serif, all-caps type.
+\newcommand{\openepigraph}[2]{%
+  %\sffamily\fontsize{14}{16}\selectfont
+  \begin{fullwidth}
+  \sffamily\large
+  \begin{doublespace}
+  \noindent\allcaps{#1}\\% epigraph
+  \small\allcaps{#2}% author
+  \end{doublespace}
+  \end{fullwidth}
+}
+
+\newpage\thispagestyle{empty}
+\openepigraph{%
+  ``If I can't picture it, I can't understand it.''
+}{{\em Albert Einstein.}}
+\vspace{4cm}
+\openepigraph{%
+``The greatest value of a picture is when it forces us to notice what we never expected to see.''
+}{{\em John Tukey.}}
+% v.2 epigraphs
+
+\vfill

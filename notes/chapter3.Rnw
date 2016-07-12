@@ -1,0 +1,449 @@
+% !TeX root = lecture.Rnw 
+<<echo=FALSE>>=
+# require(ggplot2)
+# require(reshape2)#need for data
+# require(plyr)#need for round_any
+# data(mpg)
+# data(tips)
+@ 
+
+\chapter{Plot building}
+
+\section{The basic plot object}
+
+To create an initial ggplot object, we use the \cc{ggplot()} function. This
+function has two arguments:
+\begin{itemize}
+\item \textbf{\cc{data}} and
+\item an aesthetic \textbf{\cc{mapping}}.
+\end{itemize}
+These arguments set up the defaults for the various layers that are added to the
+plot and can be empty. For each plot layer, these arguments can be overwritten.
+The \cc{data} argument is straightforward - it is a data
+frame\sidenote{\cc{ggplot2} is very strict regarding the \cc{data} argument. It
+  doesn't accept matrices or vectors. The underlying philosophy is that
+  \cc{ggplot2} takes care of plotting, rather than messaging it into other
+  forms. If you want to do some data manipulation, then use other tools.}. The
+\cc{mapping} argument creates default aesthetic attributes. For example
+
+<<cache=TRUE, tidy=FALSE>>=
+g = ggplot(data=mpg, 
+      mapping=aes(x=displ, y=cty, colour=factor(cyl)))
+@ 
+
+\noindent or equivalently,
+
+<<cache=TRUE>>=
+g = ggplot(mpg, aes(displ, cty, colour=factor(cyl)))
+@ 
+
+\noindent The above commands don't actually produce anything to be displayed, we need to
+add layers for that to happen.
+
+\section{The geom\_ functions}
+
+The \cc{geom\_} functions are used to perform the actual rendering in a plot.
+For example, we have already seen that a line geom will create a line plot and a
+point geom creates a scatter plot. Each geom has a list of aesthetics that it
+expects.\sidenote{For example, \cc{x}, \cc{y}, \cc{colour} and \cc{size}.}
+However, some geoms have unique elements. The error-bar geom requires arguments
+\cc{ymax} and \cc{ymin}. Table \ref{T3.1} gives some standard
+geoms.\sidenote{For a full list, see table 4.2 of the ggplot2 book or online at
+  \url{http://had.co.nz/ggplot2/}.}
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Name & Description \\
+    \midrule
+    \cc{abline} & Line, specified by slope and intercept \\
+    \cc{boxplot} & Box and whiskers plot\\
+    \cc{density} & Kernel density plot \\
+    \cc{density\_2d} & Contours from a 2s density estimate \\
+    \cc{histogram} & Histograms \\
+    \cc{jitter} & Individual points are jittered to avoid overlap \\
+    \cc{smooth} & Add a smoothed condition mean \\
+    \cc{step} & Connect observations by stairs \\
+    \bottomrule
+  \end{tabular}
+  \caption{A few standard \cc{geom\_} functions in \cc{ggplot2}.}
+  \label{T3.1}
+\end{table}
+
+
+\subsection{Example: combining geoms}
+
+Let's look at the tips data set - see \S\ref{tips} for a description. We
+begin by creating a base ggplot object
+
+\begin{marginfigure}[-8\baselineskip]
+  \centering
+  \includegraphics[]{figure3_1-crop}
+  \caption{A boxplot of tips earned by the waiter.}\label{F3.1}
+\end{marginfigure}
+
+<<>>=
+g = ggplot(tips, aes(x=size, y=tip)) 
+@ 
+
+\noindent Remember, the above piece of code doesn't do anything. Now we'll create a
+boxplot using the boxplot geom:
+
+<<fig.keep='none', warning=FALSE>>=
+(g1 = g + geom_boxplot())
+@ 
+
+\noindent This produces figure \ref{F3.1}. Notice that the default axis labels are the
+column headings of the associated data frame. Figure \ref{F3.1} is a boxplot of
+all the tips data, a more useful plot would be to have individual boxplots
+conditional on table size
+
+\begin{marginfigure}[\baselineskip]
+  \centering
+  \includegraphics[width=\textwidth]{figure3_2-crop}
+  \caption{A boxplots of tips, conditional on table size.}\label{F3.2}
+\end{marginfigure}
+
+<<>>=
+g2 = g + geom_boxplot(aes(group=size))
+@ 
+
+\noindent Notice that we have included a group aesthetic to the boxplot \cc{geom}.
+Many \cc{geom}'s have this aesthetic. For example, if we used \cc{geom\_line}, then
+we would have individual lines for each size - this doesn't make much sense in
+this scenario.
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure3_3-crop}
+  \caption{As figure \ref{F3.2}, but including the data points.}\label{F3.3}
+\end{marginfigure}
+We are not restricted to a single geom - we can add multiple geoms. When data
+sets are reasonably small, it is useful to display the data on top of the boxplots:
+
+<<tidy=FALSE>>=
+g3 = g2  + geom_dotplot(aes(group=size), 
+              binaxis="y", stackdir="center",
+              binwidth=0.05, stackratio=0.5)
+@ 
+
+\noindent This generates figure \ref{F3.3}. The dotplot geom produces a sort of histogram. Notice that we can start picking off some patterns, such as people tend to tip "standard" amounts.
+
+
+<<echo=FALSE, cache=TRUE, warning=FALSE>>=
+pdf("graphics/figure3_1.pdf", width=5, height=5)
+print(g1)
+sink=dev.off()
+system("pdfcrop graphics/figure3_1.pdf")
+
+pdf("graphics/figure3_2.pdf", width=5, height=5)
+print(g2)
+sink=dev.off()
+system("pdfcrop graphics/figure3_2.pdf")
+
+pdf("graphics/figure3_3.pdf", width=5, height=4)
+print(g3 + ylim(c(0, 10)))
+sink=dev.off()
+system("pdfcrop graphics/figure3_3.pdf")
+@ 
+
+
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure3_4-crop}
+  \caption{A bar chart of the MPAA rating.}\label{F3.4}
+\end{marginfigure}
+\clearpage
+
+\section{Standard plots}
+
+
+There are a few standard \cc{geom}'s that are particular useful:
+\begin{itemize}
+\item \cc{geom\_boxplot}: produces a boxplot - see figure \ref{F3.1}.
+\item \cc{geom\_point}: a scatter plot - see figure \ref{F3.3}.
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure3_5-crop}
+  \caption{A heatmap of some example data using \cc{geom\_raster}. New to
+    version 0.9.}\label{F3.5}
+\end{marginfigure}
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure3_6-crop}
+  \caption{Illustration of the continuous colour aesthetic.}\label{F3.6}
+\end{marginfigure}
+\item \cc{geom\_bar}: produces a standard barplot that counts the \cc{x} values.
+  For example, to generate a bar plot in figure \ref{F3.4} of the MPAA ratings
+  in the movie data set, we use the following code:
+  
+<<fig.keep='none'>>=
+h = ggplot(movies, aes(x=mpaa)) + geom_bar()
+@ 
+
+\item \cc{geom\_line}: a line plot - see practical 3.
+\item \cc{geom\_text}: adds labels to specified points. This has an additional
+  (required) aesthetic: \cc{label}. Other useful aesthetics, such as \cc{hjust}
+  and \cc{vjust} control the horizontal and vertical position. The \cc{angle}
+  aesthetic controls the text angle.
+
+\item \cc{geom\_raster}: Similar to \cc{levelplot} or \cc{image}. For example, 
+
+<<fig.keep='none', tidy=FALSE>>=
+data(raster_example, package="codataVis")
+g_rast = ggplot(raster_example, aes(x, y)) + 
+  geom_raster(aes(fill=z))
+@ 
+
+generates figure \ref{F3.5}. If the squares are unequal, then use the (slower)
+\cc{geom\_tile} function.
+\end{itemize}
+
+
+\section{Aesthetics}
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure3_7-crop}
+  \caption{Illustration of the discrete colour aesthetic.}\label{F3.7}
+\end{marginfigure}
+\begin{marginfigure}
+  \centering
+  \includegraphics[width=\textwidth]{figure3_8-crop}
+  \caption{Illustration of a constant colour aesthetic.}\label{F3.8}
+\end{marginfigure}
+
+The key to successfully using aesthetics is remembering that the \cc{aes()}
+function maps data to an aesthetic. If the parameter is not data or is constant,
+then don't put it in an aesthetic. Only parameters that are inside of an
+\cc{aes()} will appear in the legend. To illustrate these ideas, we'll generate
+a simple scatter-plot
+
+<<fig.keep='none', cache=TRUE>>=
+d = data.frame(x=1:50, y = 1:50, z = 0:9)
+g_aes = ggplot(d, aes(x = x, y = y))
+g_aes + geom_point(aes(colour = z))
+@ 
+
+\noindent which gives figure \ref{F3.6}. Here the \cc{z} variable has been
+mapped to the \cc{colour} aesthetic. Since this parameter is continuous,
+\cc{ggplot2} uses a continuous colour palette. Alternatively, if we make \cc{z} a
+factor or a character, \cc{ggplot2} uses a different colour palette
+
+
+<<fig.keep='none', cache=TRUE>>=
+g_aes + geom_point(aes(colour=factor(z)))
+@ 
+
+\noindent to get figure~\ref{F3.7}. If we set the aesthetic to a constant value (figure~\ref{F3.8})
+
+
+<<fig.keep='none', cache=TRUE>>=
+g_aes + geom_point(aes(colour="Blue"))
+@ 
+
+\noindent the resulting plot is unlikely to be what we intended. The value
+\cc{`Blue'} is just treated as a standard factor. Instead, you probably
+wanted
+
+<<fig.keep='none', cache=TRUE>>=
+g_aes + geom_point(colour="Blue")
+@ 
+
+\noindent Another important point, is that when you specify mappings inside
+\cc{ggplot(aes())}, these mappings are inherited by every subsequent layer. This
+is fine for \cc{x} and \cc{y}, but can cause trouble for other aesthetics. For
+example, using the \cc{colour} aesthetic is fine for \cc{geom\_line}, but may
+not be suitable for \cc{geom\_text}.
+
+There are few standard aesthetics that appear in most, but not all, \cc{geom}'s
+and \cc{stat}'s (see table \ref{T3.2}). Individual \cc{geom}'s can have
+additional optional and required aesthetics. See their help file for further
+information.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Aesthetic & Description \\
+    \midrule
+    \cc{linetype} & Similar to \cc{lty} in base graphics\\
+    \cc{colour} & Similar to \cc{col} in base graphics\\
+    \cc{size} & Similar to \cc{size} in base graphics\\
+    \cc{fill} & See figure \ref{F3.5}. \\
+    \cc{shape} & Glyph choice\\
+    \cc{alpha} & Control the transparency \\
+    \bottomrule
+  \end{tabular}
+  \caption{Standard aesthetics. Individual \cc{geom}'s may have other aesthetics. For
+    example, \cc{geom\_text} uses \cc{label} and \cc{geom\_boxplot} has, amongst
+    other things, \cc{upper}.}
+  \label{T3.2}
+\end{table}
+
+<<echo=FALSE, cache=TRUE, results="hide">>=
+pdf("graphics/figure3_4.pdf", width=5, height=5)
+print(h)
+sink=dev.off()
+system("pdfcrop graphics/figure3_4.pdf")
+
+pdf("graphics/figure3_5.pdf", width=5, height=5)
+print(ggplot(raster_example, aes(x, y))  + geom_raster(aes(fill=z)))
+sink=dev.off()
+system("pdfcrop graphics/figure3_5.pdf")
+
+pdf("graphics/figure3_6.pdf", width=5, height=5)
+print(g_aes + geom_point(aes(colour = z)))
+sink=dev.off()
+system("pdfcrop graphics/figure3_6.pdf")
+
+pdf("graphics/figure3_7.pdf", width=5, height=5)
+print(g_aes + geom_point(aes(colour = factor(z))))
+sink=dev.off()
+system("pdfcrop graphics/figure3_7.pdf")
+
+pdf("graphics/figure3_8.pdf", width=5, height=5)
+print(g_aes + geom_point(aes(colour = "Blue")))
+sink=dev.off()
+system("pdfcrop graphics/figure3_8.pdf")
+@ 
+
+
+\section{The \cc{stat\_} functions}
+
+The \cc{stat\_} functions focus on transforming data. For example, in figure
+\ref{F2.5} we use a loess\sidenote{A loess smoother is a non-parametric method
+  for smoothing data. It is called local regression because value at point $x$
+  is weighted toward the data nearest to $x$.} smoother function (conditional on
+the number of cylinders) to plot the overall data trend. Remember, all geoms
+have stats and, vice visa, all stats have geoms.
+
+A stat takes a dataset as input and returns a dataset as an output. For example,
+the boxplot stat\sidenote{Used by both \cc{geom\_boxplot} and
+  \cc{stat\_boxplot}.} takes in a data set and produces the following variables:
+\begin{itemize}
+\item lower
+\item upper
+\item middle
+\item ymin: bottom (vertical minimum) 
+\item ymax: top (vertical maximum).
+\end{itemize}
+Typically, these statistics are used by the boxplot geom. Equally, they could be
+used by the error bar geom. 
+
+A widely used stat, is \textit{identity}. This stat
+does not alter the underlying data and is used by a number of geoms, such as
+\cc{geom\_point} and \cc{geom\_line}.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    Name & Description & Comment \\
+    \midrule
+    \cc{bin} & Bin data & histogram \\
+    \cc{boxplot} & Calculates the components & See \cc{geom\_boxplot}\\
+    & of box-and-whisker plots\\
+    \cc{contour} & Contours of 3d data \\
+    \cc{density} & 1d density estimation\\
+    \cc{density\_2d} & 2d density estimation\\
+    \cc{function} & Superimpose a function\\
+    \cc{identity} & Leave the data untouched & Used in most geoms\\
+    \cc{qq} & Calculation for q-q plots\\
+    \cc{quantile} & Continuous quantiles \\
+    \cc{smooth} & Add a smoother \\
+    \cc{spoke} & Convert angle and radius \\
+    & to \cc{xend} and \cc{yend}\\
+    \cc{step} & Create stair steps  & See \cc{geom\_step}\\
+    \cc{sum} & Sum unique values \\
+    \cc{summary} & Summarises \cc{y} values \\
+    &at every unique \cc{x}\\
+    \cc{unique} & Remove duplicates \\
+    \bottomrule
+  \end{tabular}
+  \caption{Standard \cc{stat\_} functions.}
+  \label{T3.3}
+\end{table}
+
+\subsection{Example: combining stats}
+
+
+Perhaps the easiest \cc{stat} to consider is the \cc{stat\_summary} function.
+This function summarises \cc{y} values at every unique \cc{x} value. This is
+quite handy, for example, when adding single points that summarise the data or
+adding error bars.
+
+\begin{marginfigure}[-20\baselineskip]
+  \centering
+  \includegraphics[width=\textwidth]{figure3_9-crop}
+  \caption{Average tip amount conditional on table size.}\label{F3.9}
+\end{marginfigure}
+
+A simple plot to create, is the mean tip amount based on table size, figure \ref{F3.9}:
+
+<<cache=TRUE>>=
+g4 = g + stat_summary(geom="point", fun.y= mean)
+@ 
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[width=\textwidth]{figure3_10-crop}
+  \caption{The ratio of the mean to median tip amount conditional on table
+    size.}\label{F3.10}
+\end{marginfigure}
+
+\noindent In the above piece of code we calculate the mean tip size for each
+unique \cc{x} value, that is, for different table sizes. These x-y values are
+passed to the \cc{point} geom. We can use any function for \cc{fun.y} provided
+it takes in a vector and returns a single point. For example, we could calculate
+the ratio of the mean and median, as in figure \ref{F3.10}:
+
+<<tidy=FALSE>>=
+g5 = g + stat_summary(geom="point", 
+  fun.y= function(i) mean(i)/median(i))
+@ 
+
+
+\newthought{As with the} \cc{geom} example, we can combine multiple \cc{stat}s:
+
+<<tidy=FALSE>>=
+g6 =  g + 
+  stat_summary(fun.ymin = function(i) quantile(i, 0.25), 
+               fun.ymax = function(i) quantile(i, 0.75), 
+               colour="blue", geom="errorbar", 
+               width=0.2) +
+  stat_smooth(aes(colour=smoker, lty=smoker), 
+               se=FALSE, method="lm") 
+@ 
+
+\noindent Using the \cc{stat\_summary} function, we have created error bars that
+span the inter quantile range. The \cc{stat\_smooth} function plots the
+regression lines, conditional on whether someone on the table smokes - figure
+\ref{F3.11}.
+\begin{marginfigure}
+  \centering
+  \includegraphics[width=\textwidth]{figure3_11-crop}
+  \caption{The IQR of the tip amount displayed using error bars. The
+    \cc{stat\_smooth} function is used to add OLS regression lines, conditional
+    on whether anyone in the party smoked.} \label{F3.11}
+\end{marginfigure}
+<<echo=FALSE, cache=TRUE>>=
+pdf("graphics/figure3_9.pdf", width=5, height=5)
+print(g4)
+sink=dev.off()
+system("pdfcrop graphics/figure3_9.pdf")
+
+pdf("graphics/figure3_10.pdf", width=5, height=5)
+print(g5)
+sink=dev.off()
+system("pdfcrop graphics/figure3_10.pdf")
+
+pdf("graphics/figure3_11.pdf", width=5, height=5)
+print(g6)
+sink=dev.off() 
+system("pdfcrop graphics/figure3_11.pdf")
+@ 
+
+
+

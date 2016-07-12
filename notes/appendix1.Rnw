@@ -1,0 +1,31 @@
+\chapter{Appendix}\label{A1}
+
+\section*{Course R package}
+
+This course has an associated R package. Installing this
+  package is straightforward. First install the \cc{drat} 
+  package
+
+<<eval=FALSE>>=
+install.packages("drat")
+@ 
+
+\noindent Then run the command\sidenote{This adds a new repo URL to you list of
+  repositories.}
+
+<<>>=
+drat::addRepo("rcourses")
+@ 
+
+\noindent Then install the package as usual
+
+<<eval=FALSE>>=
+install.packages("codataVis")
+@ 
+
+\noindent To load the package, use
+
+<<>>=
+library("codataVis")
+@ 
+

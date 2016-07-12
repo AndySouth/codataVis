@@ -1,0 +1,124 @@
+---
+title: "Practical 2"
+author: "Colin Gillespie"
+output: rmarkdown::html_vignette
+---
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Practical 2}
+-->
+
+## Over plotting
+
+Scatter plots are very useful. However, when we have a large data set, points
+will be plotted on top of each other obscuring the relationship. We call this
+problem over plotting. There are a few techniques we can use to help, although
+the best solution is often problem specific.
+
+To begin with we will create an example data frame:
+
+```{r overplotting}
+## If your computer is slow when plotting reduce the value of n
+library("codataVis")
+library("ggplot2")
+df = overplot_data(n = 10000)
+```
+
+We can create a simple scatter plot of this data using the following command
+
+```{r}
+h = ggplot(df) + geom_point(aes(x, y))
+h
+```
+
+This plot isn't particularly good. Try to improve it by using a
+combination of:
+
+
+  * changing the transparency level: `alpha`; (`alpha` takes a value between $0$ and $1$.)
+  * change the shape: `shape=1` and `shape="."`
+  * use some jittering - `geom_jitter`.
+  * adding a contour to the plot using `stat_density2d`.
+  * What does
+    ```{r cache=TRUE, fig.keep='none', tidy=FALSE}
+    h +  stat_density2d(aes(x,y, fill=..density..),
+                contour=FALSE, geom="tile")
+    ```
+  do?
+  * What does `stat_bin2d()` and `stat_binhex()` do - add it to the
+  plot to find out! Try varying the parameters `bins` and `binwidth`.
+
+
+## Displaying distributions
+
+The diamonds data set contains the prices and other attributes of almost 54,000
+diamonds. It is a data frame with $53,940$ rows and $10$ variables. First, load the
+diamonds data set:
+
+```{r}
+data(diamonds, package="ggplot2")
+```
+
+and look at the help file:
+
+```{r tidy=FALSE, eval=FALSE}
+?diamonds
+```
+
+We can construct a histogram of diamond depth using the following commands:
+
+```{r message=FALSE, fig.cap="Histogram of the diamond data set."}
+i1 = ggplot(data=diamonds) + geom_histogram(aes(x=depth))
+i1
+```
+
+Let's experiment a bit.
+
+1. Change the `binwidth` in the `geom_histogram`. What value do you
+  think is best?
+2. What happens when you set `colour=cut` in the `geom_histogram`
+  aesthetic? What other options can you change? Hint: look at the `geom_histogram` [help page](http://had.co.nz/ggplot2/geom_histogram.html)
+3. Try `geom_density`. Set `fill=cut` and change the `alpha` value.
+4. Try `geom_boxplot`.
+
+
+## Copy cat
+
+```{r, echo=FALSE, message=FALSE, fig.keep='none',results='hide'}
+data(mpg, package="ggplot2")
+g = ggplot(data=mpg, aes(x=displ, y=hwy)) 
+g1 = g + geom_point() + stat_smooth(linetype=2) + 
+  xlab("Displacement") + ylab("Highway mpg")
+g2 = g + geom_point() + stat_smooth(aes(colour=drv))
+```
+
+
+The aim of this section is to recreate the graphics. Feel
+free to experiment. To begin, load the `mpg` data set
+
+```{r results='hide'}
+data(mpg, package="ggplot2")
+dim(mpg)
+```
+
+Create a scatter plot of engine displacement,
+  `displ`, against highway mpg, `hwy`. To get started:
+  
+```{r fig.keep='none', tidy=FALSE, echo=-3}
+ggplot(data=mpg, aes(x=displ, y=hwy)) +  
+  geom_point() + xlab("Displacement")
+```
+
+Now add a dashed loess line and change the $y$-axis label. 
+Hint: try `stat_smooth` and `ylab('New label')`.
+
+```{r echo=FALSE, fig.pos="center", fig.width=6}
+g1
+```
+
+Using `stat_smooth`, add a loess line conditional
+  on the drive. 
+
+```{r echo=FALSE, fig.width=6}
+g2
+```

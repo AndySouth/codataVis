@@ -1,0 +1,25 @@
+language: r
+cache: packages
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+    
+before_install:
+  - tlmgr install fancyvrb units
+
+script: 
+  - cd notes && make
+
+r_github_packages:
+  - renkun-ken/formattable
+r_packages:
+  - drat
+  
+after_success:
+  - wget https://raw.githubusercontent.com/rcourses/drat/master/deploy.sh
+  - test $TRAVIS_PULL_REQUEST == "false" && test $TRAVIS_BRANCH == "master" && bash deploy.sh
+
+env:
+  global:
+    secure: pD+w/CseMgUHuEsWM3jNJHHjSaHUkR9Oz7QNTKE77fY++QErcJynRQRYaRNnhIPVryquxVvCzbiGxCku6aMDO6L+R0TpIAbyMouY1AAh4p+Zx9rr0kMoT9D+OAhX8is3jCjD5E7BCIcQPomzw8PCyq/6tK1y0Zy5bPSQXz7IhQFxMglfgZUTbF6ZhrTB1XLXmulsVZSZJgafKgwfWp0V5pjqNwRAdvMDlSqCFki+YA5aT0lN//yqy2pv3aEmqemU5IuoLdhxRmhngychSayxyhWvGiBHvKSEDLkyOWTm1wtwbJKdFpaHudWhR6+EC7+PFrFr99EXrPyUTQe+oDbWL2M/ccyyKmcycn27VTz3hd82ZNaaJ6tU+0rgVjPB6e1Fb0Q+h9BaWudvwaU9V61bZaoj34di3Tf0jbSJSestQnA0tuNb6HzNm8RkGWVyxcVAyMpywxzSrO6QJyfpxBuWiIjcO62SaFHskuS2Py7Q9Poz1O9NqGbxUOpk1/z3kMosUOqt98lWVwKATZ+Zqv/wFmKhq1ek/8HCcsk+K1uEO3qKnrJc67vhS8sXJ82kBYWRU7nc0P9jFomCtndp4wY5W4knmRpaJntlzZWS6fieURGbk1PAH1N4PDGlrmcECZBDwEz8FQyNrklcNaZnGOqEMhby151jW9RY/ZLPG7XGGFo=

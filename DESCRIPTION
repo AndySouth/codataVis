@@ -1,0 +1,15 @@
+Package: codataVis
+Title: CODATA Visualistion package
+Version: 0.0.1
+Authors@R: person("Colin", "Gillespie", email = "csgillespie@gmail.com", role = c("aut", "cre"))
+Description: Package for the visualisation course at the CODATA center.
+Depends: R (>= 3.3.0)
+Imports: ggplot2 (>= 2.1.0), ggplot2movies, hexbin, stats, MASS
+Suggests: knitr, tibble, d3heatmap, DT, edgebundleR, ggiraph, networkD3, svgPanZoom, 
+  plotly, svglite, formattable
+RoxygenNote: 5.0.1  
+VignetteBuilder: knitr
+License: GPL-2 | GPL-3
+Encoding: UTF-8
+LazyData: true
+Repository: rcourses

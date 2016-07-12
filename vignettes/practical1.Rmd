@@ -1,0 +1,244 @@
+---
+title: "Practical 1"
+author: "Colin Gillespie"
+output: rmarkdown::html_vignette
+---
+<!--
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteIndexEntry{Practical 1}
+-->
+  
+## Course R package
+
+Installing the course R package is straightforward. First install __drat__:
+
+```{r eval=FALSE, tidy=FALSE}
+install.packages("drat")
+```
+
+Then
+
+```{r eval=FALSE, tidy=FALSE}
+drat::addRepo("rcourses")
+install.packages("codataVis")
+```
+
+This R package contains copies of the practicals, solutions and data sets that we require. To load the package, use
+
+```{r}
+library("codataVis")
+```
+
+## Practical 1
+
+To get you familiar with the underlying `ggplot2` concepts, we'll recreate
+some standard graphics. Some these of plots aren't particularly useful, we are
+just using them for illustration purposes.
+
+To begin with, load the `ggplot2` 
+
+```{r}
+library("ggplot2")
+```
+
+Next we load the beauty data set
+
+```{r}
+# Details of the beauty data
+# set can be found at the end of this practical.
+data(Beauty, package="codataVis")
+```
+
+When loading in data, it's always a good idea to carry out a sanity
+check. I tend to use the commands
+
+```{r results='hide'}
+head(Beauty)
+colnames(Beauty)
+dim(Beauty)
+```
+
+## Scatter plots
+
+Scatter plots are created using the point geom. Let's start with a basic scatter
+plot
+
+```{r fig.keep='none'}
+ggplot(data=Beauty) + geom_point(aes(x=age, y=beauty))
+```
+
+To save typing, we can also store the plot as a variable
+
+```{r cache=TRUE, echo=-3}
+g = ggplot(data=Beauty)
+g1 = g + geom_point(aes(x=age, y=beauty))
+```
+
+To view this plot, type `g1`
+
+```{r}
+g1
+```
+
+The arguments `x` and `y` are called __aesthetics__. For `geom_point`,
+these parameters are required. This particular geom has other aesthetics:
+`shape`, `colour`, `size` and `alpha`. Here are some things to try out.
+
+Experiment with other aesthetics. For example,
+```{r fig.keep='none'}
+g + geom_point(aes(x=age, y=beauty, colour=gender))
+```
+or
+```{r fig.keep='none', tidy=FALSE, cache=TRUE}
+g + geom_point(aes(x=age, y=beauty, alpha=evaluation, colour=gender))
+```
+
+Some aesthetics, like `shape` must be discrete. So use `shape = factor(tenured)`.
+  
+  * Are there any differences between numeric values like `tenured` and
+  characters like `gender` for some aesthetics? What happens if you convert
+  `tenured` to a factor in the `colour` aesthetic. For example, `colour = factor(tenured)`.
+  
+  * What happens if you set `colour} (or some other aesthetic) outside of
+  the `aes} function? For example, compare
+  
+    ```{r fig.keep='none'}
+    g + geom_point(aes(x=age, y=beauty, colour="blue"))
+    ```
+
+    to
+
+    ```{r fig.keep='none'}
+    g + geom_point(aes(x=age, y=beauty), colour="blue")
+    ``` 
+
+  * What happens when you set an aesthetic to a constant value. For example,
+  `colour=2`. What happens if you put this argument outside of the `aes` function?
+
+
+
+## Box plots
+
+The box plot geom has the following aesthetics: `x`, `y`, `colour`,
+`fill`, `linetype`, `weight`, `size` and `alpha`. We can create a
+basic boxplot using the following commands:
+
+```{r, fig.keep='none'}
+g + geom_boxplot(aes(x=gender, y=beauty))
+```
+
+Similar to the point geom, we can add in aesthetics:
+
+```{r fig.keep='none', cache=TRUE, tidy=FALSE}
+g + geom_boxplot(aes(x=gender, y=beauty, colour=factor(tenured)))
+```
+
+Why do you think we have to convert `tenured` to a discrete factor?
+
+As before, experiment with the different aesthetics. For some of the aesthetics,
+you will need to convert the continuous variables to discrete variables. For example, this will give an error:
+
+```{r eval=FALSE}
+g + geom_boxplot(aes(x=gender, y=beauty, colour=tenured))
+```
+
+while this is OK% (Why?)
+
+```{r fig.keep='none', tidy=FALSE}
+g + geom_boxplot(aes(x=gender, y=beauty, colour=factor(tenured)))
+```
+
+Make sure you play about with the different aesthetics. 
+
+## Combining plots
+
+The key idea with **ggplot2** is to think in terms of layers not in terms of
+plot _types_ (in the lectures we will discuss what this means.) For
+example,
+
+```{r fig.keep='none', tidy=FALSE}
+g + geom_boxplot(aes(x=gender, y=beauty, colour=factor(tenured))) + 
+  geom_point(aes(x=gender, y=beauty)) 
+```
+
+  * What happens to the plot if you swap the order of the `geom_boxplot`
+  and `geom_point` function calls?
+  * In this case, `geom_point` isn't that great. Try using
+  `geom_jitter`; we have a bit too much data for `geom_jitter`, but you get the point.:
+  
+    ```{r fig.keep='none', tidy=FALSE}
+    g + geom_boxplot(aes(x=gender, y=beauty, colour=factor(tenured))) + 
+      geom_jitter(aes(x=gender, y=beauty)) 
+    ```
+
+## Bar plots
+
+The bar geom has the following aesthetics: `x`, `colour`, `fill`,
+`size`, `linetype`, `weight` and `alpha`. Here is a command to get
+started:
+
+```{r fig.keep='none'}
+g + geom_bar(aes(x=factor(tenured)))
+```
+
+  * As before, try different aesthetic combinations. Convert parameters to
+  discrete versions as needed using `factor(...)`.
+  * Let's get a bit more fancy. First, we round ages to the
+nearest decade:
+
+    ```{r fig.keep='none'}
+    Beauty$dec = factor(signif(Beauty$age, 1))
+    ```
+    then plot:
+
+    ```{r fig.keep='none'}
+    g = ggplot(data=Beauty)
+    g + geom_bar(aes(x=gender, fill=dec))
+    ```
+    We can adjust the layout of this bar plot using ggplot's position
+    adjustments. The five possible adjustments are listed in table below. The
+  __default__ adjustment is `stack`
+
+    ```{r tidy=FALSE, fig.pos="center"}
+    g + geom_bar(aes(x=gender, fill=dec), position="stack")
+    ```
+
+  * Try the other adjustments.
+
+```{r t1, echo=FALSE}
+dd = tibble::frame_data(
+  ~Adjustment, ~Description,
+    "`dodge`" , "Adjust position by overlapping to the side",
+    "`fill`" , "Stack overlapping elements; standardise stack height",
+    "`identity`" , "Do nothing",
+    "`jitter`" , "Jitter points",
+    "`stack`" , "Stack overlapping elements")
+knitr::kable(dd, caption="Position adjustments")
+```
+
+# The beauty data set {#beauty}
+
+```{r t2, echo=FALSE}
+data(Beauty, package="codataVis")
+knitr::kable(Beauty[1:5,], caption = "The first five rows of the `beauty` data set. There are a total of 463
+    course evaluations.")
+```
+
+This data set is from a study where researchers were interested in whether a
+lecturers' attractiveness affected their course evaluation.\cite{Hamermesh2003} 
+This is a cleaned version of the data set and contains the following variables:
+
+  * `evaluation` - the questionnaire result.
+  * `tenured` - does the lecturer have tenure; 1 == Yes. In R, this value
+  is continuous.
+  *  `minority` - does the lecturer come from an ethnic minority (in the USA).
+  * `age`.
+  * `gender`.
+  * `students` - number of students in the class.
+  * `beauty` - each of the lecturers’ pictures was rated by six
+  undergraduate students: three women and three men. The raters were told to use
+  a 10 (highest) to 1 rating scale, to concentrate on the physiognomy of the
+  professor in the picture, to make their ratings independent of age, and to
+  keep 5 in mind as an average. The scores were then normalised.
+
+

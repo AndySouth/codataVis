@@ -1,0 +1,333 @@
+% !TeX root = lecture.Rnw 
+\chapter{Scales}
+<<echo=FALSE, message=FALSE>>=
+library(ggplot2)
+@
+
+
+\section{Axis scales}
+
+When we create complex plots involving multiple layers, \cc{ggplot2} uses an
+iterative process to calculate the correct scales. For example, if in figure
+\ref{F3.11} we only plotted the regression lines, \cc{ggplot2} would reduce the
+y-axis scale. We can specify set scales using the \cc{xlim} and \cc{ylim}
+functions. However, if we use these functions, any data that falls outside of
+the plotting region isn't plotted \textbf{and} isn't used in statistical
+transformations. For example, when calculating the \cc{binwidth} in histograms.
+If you want to zoom into a plot region, then use \mbox{\cc{coord\_cartesian(xlim
+    = c(.., ..))}} instead.
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure5_1.png}
+  \caption{Scatter plot of movie budget against length.}\label{F5.1}
+\end{marginfigure}
+
+\newthought{At times,} we may want to transform the data. A standard example is
+the $\log$ transformation. Suppose we wanted to create a scatter plot of length
+against budget. We remove any movies that have a zero budget or length. Then we
+use the following commands
+
+<<cache=TRUE, tidy=FALSE>>=
+data(movies, package="ggplot2movies")
+h = ggplot(subset(movies, length>0 & budget>0), 
+  aes(y=length)) + ylim(0, 500) 
+h1 = h +  geom_point(aes(budget), alpha=0.2) 
+@ 
+
+\noindent to get figure \ref{F5.1}. Notice that we have changed the alpha
+transparency value to help with over plotting.
+
+To plot the log budgets, there are two possibilities. First, we could transform
+the scale
+
+<<cache=TRUE>>=
+h2 = h + geom_point(aes(log10(budget)), alpha=0.2)
+@ 
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure5_2.png}
+    \caption{Scatter plot of movie log10(budget) against length.}\label{F5.2}
+\end{marginfigure}
+
+\noindent to get figure \ref{F5.2}. Note that \cc{ylim(0, 500)} is shorthand
+for\linebreak[4] \cc{scale\_y\_continuous(limits=c(0, 500))}. Alternatively, we
+can transform the data:
+
+<<fig.keep='none', cache=TRUE>>=
+h3 = h1 + scale_x_log10()
+##Or equivalently
+h1 + scale_x_continuous(trans="log10")
+@ 
+
+\noindent to get figure \ref{F5.3}. Figures \ref{F5.2} and \ref{F5.3} are
+identical, but in figure \ref{F5.3} we are still using the original scale. To
+generate figure~\ref{F5.3} we used \cc{scale\_x\_log10()} this is a convenience
+function of the\linebreak[4] \mbox{\cc{scale\_x\_continuous(trans="log10")}}
+function. Some standard scale transformations are given in table \ref{T5.1}. As
+an aside, the \cc{scale} functions are fundamentally different from \cc{geom}'s,
+since they don't add a layer to the plot.
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure5_3.png}
+  \caption{Scatter plot of movie budget against length, with the budget data
+    transformed.}\label{F5.3}
+\end{marginfigure}
+The \cc{scale\_*} functions can also adjust the tick marks and labels. For example,
+
+<<tidy=FALSE, message=FALSE>>=
+h4 = h3 + 
+  scale_y_continuous(breaks=seq(0, 500, 100), 
+                     limits=c(0, 500), 
+                     minor_breaks = seq(0, 500, 25),
+                     labels=c(0, "", "", "", "", 500), 
+                     name="Movie Length")
+@ 
+
+\noindent gives figure \ref{F5.4}. If you just want to change the x-axis limits or name,
+then you can use the convenience functions \cc{xlim} and \cc{xlab}. There are
+similar functions for the y-axis.
+
+\begin{marginfigure}
+  \centering
+  \includegraphics[]{figure5_4.png}
+  \caption{Scatter plot of movie budget against length. Using
+    \cc{scale\_y\_continuous} gives us more control of tick marks and grid
+    lines.}\label{F5.4}
+\end{marginfigure}
+
+\begin{table}[b]
+  \centering
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Function & Description \\
+    \midrule
+    \cc{*\_continuous(...)} & Main scale function.\\
+    \cc{*\_log10(...)} & $\log_{10}$ transformation. \\
+    \cc{*\_reverse(...)} & Reverse the axis.\\
+    \cc{*\_sqrt(...)} & The square root transformation.\\
+    \cc{*\_datetime(...)} & Precise control over dates and times.\\ 
+    \cc{*\_discrete(...)} & Not usually needed - see \S 6.3 of Wickham, 2009. \\
+    \bottomrule
+  \end{tabular}
+  \caption{Standard scales in \cc{ggplot2}. In the above, replace \cc{*} with
+    either \cc{scale\_x} or \cc{scale\_y}. Common arguments are \cc{breaks},
+    \cc{labels}, \cc{na.value}, \cc{trans} and  \cc{limits}.  See the help files for further
+    details.}
+  \label{T5.1}
+\end{table}
+
+<<echo=FALSE, cache=TRUE>>=
+dpi = 450 
+png("graphics/figure5_1.png", width=5*dpi, height=5*dpi, res=dpi)
+print(h1)
+sink=dev.off()
+
+png("graphics/figure5_2.png", width=5*dpi, height=5*dpi, res=dpi)
+print(h2)
+sink=dev.off()
+
+png("graphics/figure5_3.png", width=5*dpi, height=5*dpi, res=dpi)
+print(h3)
+sink=dev.off()
+
+png("graphics/figure5_4.png", width=5*dpi, height=5*dpi, res=dpi)
+print(h4)
+sink=dev.off()
+@ 
+
+\clearpage
+
+\section{Colour and fill scales}
+
+
+For discrete data, there are two methods for choosing colour schemes. One that
+chooses colours in an automated way and another from hand-picked sets. The
+default is \cc{scale\_colour\_hue()}, which picks evenly spaced hues around the
+hcl colour scheme.
+
+\subsection{Discrete colours}
+\begin{figure}[t]
+  \centering
+  \includegraphics[]{figure5_5-crop}
+  \caption{Scatter plots of the \cc{mpg} data set showing different colour schemes. The theme has been changed to \mbox{\cc{theme\_bw()}}.}\label{F5.5}
+\end{figure}
+
+
+As a test, we will use the scatter plot from chapter 2:
+
+<<tidy=FALSE>>=
+g = ggplot(data=mpg, aes(x=displ, y=cty)) + 
+  geom_point(aes(colour=factor(cyl)))
+@ 
+
+\noindent We can alter the hue and intensity of the colours (figure \ref{F5.5}a):\sidenote{If you want to change
+  the \cc{fill} aesthetic, use \cc{scale\_fill\_*}.}
+  
+<<fig.keep='none'>>=
+g + scale_colour_hue(l=70, c=60) 
+@ 
+
+\noindent or use predefined colour palettes from colour brewer (figure \ref{F5.5}b):\sidenote{There are three possible types: \cc{seq} (sequential), \cc{div} (diverging) and \cc{qual} (qualitative). See \url{http://colorbrewer2.org/} for other palettes.}
+  
+<<fig.keep='none'>>=
+g + scale_colour_brewer(palette="PuOr", type="div")
+@ 
+
+\noindent or specify our own colour schemes:
+
+<<fig.keep='none', cache=TRUE, tidy=FALSE>>=
+g  + scale_colour_manual(
+   values=c("4"="red", "5"="blue", 
+     "6"="green", "8"="black"))
+@ 
+
+\noindent For black and white, you can always use:
+  
+<<fig.keep='none', cache=TRUE>>=
+g + scale_colour_grey()
+@ 
+
+\noindent to get figure \ref{F5.5}c.
+
+<<echo=FALSE, message=FALSE, cache=TRUE>>=
+library("gridExtra")
+theme_set(theme_bw())
+g_l = g+ theme(legend.position = "top")
+g1 = g_l + scale_colour_hue(l=70, c=60)
+g2 = g_l + scale_colour_brewer(palette="PuOr", type="div")
+g3 = g_l + scale_colour_grey()
+g4 = g_l + scale_colour_grey()
+
+pdf("graphics/figure5_5.pdf", height=5, width=10)
+grid.arrange(g1, g2, g3, nrow=1)
+sink=dev.off()
+system("pdfcrop graphics/figure5_5.pdf")
+@
+
+
+\subsection{Continuous Colour}
+
+When we have continuous parameters, we use a gradient of colour, instead of
+discrete values. There are three types of continuous colour
+gradients\sidenote{The \cc{*} can be either \cc{fill} or \cc{colour}.}:
+\begin{itemize}
+\item \cc{scale\_*\_gradient}: a two colour gradient, with arguments \cc{low}
+  and \cc{high} to control the end points.
+\item \cc{scale\_*\_gradient2}: a three colour gradient. As above, with
+  additional arguments: \cc{mid} (for the colour) and \cc{midpoint}. The
+  midpoint defaults to 0, but can be set to any value.
+\item \cc{scale\_*\_gradientn}: an n-colour gradient. This requires a vector of
+  colours, which default to being evenly spaced.
+\end{itemize}
+See the associated help pages for examples.
+
+\section{Multiple plots}
+
+When we want to create a figure in base graphics that contains multiple plots,
+we use the \cc{par} function. For example, to create a $2\times 2$ plot, we would use
+
+<<fig.keep='none'>>=
+par(mfrow=c(2, 2))
+@ 
+
+\noindent In ggplot2, we can do something similar. Using the \cc{gridExtra}
+package, we have
+
+<<fig.keep='none', message=FALSE>>=
+library("gridExtra")
+grid.arrange(g1, g2, g3, g4, nrow=2)
+@ 
+
+\noindent where \cc{g1}, \cc{g2}, \cc{g3} and \cc{g4} are standard ggplot2 graph
+objects.
+
+An alternative way of creating figure grids, is to use
+viewports.\marginnote{Using viewports gives you more flexibility, but is more
+  complicated.} First, we load the \cc{grid} package and create a convenience
+function
+
+<< tidy=FALSE>>=
+library("grid")
+vplayout = function(x, y) 
+  viewport(layout.pos.row = x, layout.pos.col = y)
+@ 
+
+\noindent Next we create a new page, with a $2 \times 2$ layout
+
+<<fig.keep='none', cache=TRUE>>=
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 2)))
+@ 
+
+\noindent Finally, we add the individual graphics. The plot created using the
+\cc{h} object, is placed on the first row and spans both columns:
+
+<<fig.keep='none'>>=
+print(g1, vp = vplayout(1, 1:2))
+@ 
+
+\noindent The others figures are placed on the second row (figure \ref{F5.6}): 
+
+<<fig.keep='none'>>=
+print(g2, vp = vplayout(2, 1))
+print(g3, vp = vplayout(2, 2))
+@ 
+
+
+
+<<echo=FALSE>>=
+pdf("graphics/figure5_6.pdf", width=10, height=5)
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(2, 2)))
+print(g1, vp = vplayout(1, 1:2))
+print(g2, vp = vplayout(2, 1))
+print(g3, vp = vplayout(2, 2))
+sink=dev.off()
+system("pdfcrop graphics/figure5_6.pdf")
+@ 
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[]{figure5_6-crop}
+  \caption{An example plot using the viewports. The top plot is spans two
+    columns.}\label{F5.6}
+\end{figure}
+
+
+
+\section{Other topics}
+
+There are a few topics that I have skipped, mainly due to space and time. 
+\begin{itemize}
+\item themes: if you want to make consistent changes to all your plots - say
+  reduce the font size, then you should use themes. One useful theme is
+  \cc{theme\_bw()}. This can be set globally using\linebreak[4] \cc{theme\_set(theme\_bw())}
+  or using the standard notation: \cc{+ theme\_bw()}. 
+\item coordinate systems: unlike transforming data or scales, transforming the
+  coordinate system transforms the \textit{appearance} of the geoms. For
+  example, a rectangle becomes a doughnut; in a map projection, the shortest
+  path will no longer be a straight line. See \S 7.3 of the ggplot2 book for
+  further details.
+\item Multiple plots: this includes having sub-figures on top of larger figures
+  or multiple plots on a single page. See \S 8.4 in the ggplot2 book.
+\item Legend manipulation: changing legend titles and positions.
+\item There is also a \cc{geom\_map} for plotting maps. However, I haven't
+  really used this in earnest. There is also a \cc{ggmap} package that might be
+  worth looking at.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
