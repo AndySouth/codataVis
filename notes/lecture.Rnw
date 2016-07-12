@@ -34,7 +34,7 @@ knitr::opts_chunk$set(
 % Book metadata
 \title{Advanced R Graphics} 
 \author[Dr Colin S. Gillespie]{Dr Colin S.  Gillespie}
-\graphicspath{{graphics/}}
+\graphicspath{{graphics/},{notes/graphics/}}
 
 \begin{document}
 
