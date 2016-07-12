@@ -4,9 +4,14 @@ notifications:
   email:
     on_success: change
     on_failure: change
-    
+addons:
+  apt:
+    packages:
+      - rubber
+      
 before_install:
   - tlmgr install fancyvrb units
+  
 
 script: 
   - cd notes && make
