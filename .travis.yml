@@ -12,10 +12,6 @@ addons:
 before_install:
   - tlmgr install fancyvrb units
   
-
-after_install: 
-
-
 r_github_packages:
   - renkun-ken/formattable
 r_packages:
