@@ -6,7 +6,7 @@ Description: Package for the visualisation course at the CODATA center.
 Depends: R (>= 3.3.0)
 Imports: ggplot2 (>= 2.1.0), ggplot2movies, hexbin, stats, MASS
 Suggests: knitr, tibble, d3heatmap, DT, edgebundleR, ggiraph, networkD3, svgPanZoom, 
-  plotly, svglite, formattable, rmarkdown
+  plotly, svglite, formattable, rmarkdown, xml2
 RoxygenNote: 5.0.1  
 VignetteBuilder: knitr
 License: GPL-2 | GPL-3
