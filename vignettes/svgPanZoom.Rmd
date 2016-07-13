@@ -32,11 +32,11 @@ library("svglite")## For base
 ```
 Then just wrap a base graphic function call
 ```{r, message=FALSE}
-svgPanZoom(
-  svglite:::inlineSVG(
-    plot(1:10)
-  ),controlIconsEnabled=TRUE
-)
+# svgPanZoom(
+#   svglite:::inlineSVG(
+#     plot(1:10)
+#   ), controlIconsEnabled=TRUE
+# )
 ```
 `ggplot2` is just as easy
 ```{r, message=FALSE}
@@ -45,7 +45,7 @@ data(mtcars, package="datasets")
 #install.packages("gridSVG")
 d = ggplot(mtcars, aes(mpg, disp, colour=disp)) + geom_jitter() + 
   theme_bw()
-svgPanZoom(d, controlIconsEnabled = TRUE)
+#svgPanZoom(d, controlIconsEnabled = TRUE)
 ```
 
 #### Links
