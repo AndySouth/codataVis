@@ -13,7 +13,7 @@ output: html_vignette
 ## Overview
 
 This package allows us to add panning and zooming to any R graphics, e.g. base, ggplot2, lattice.
-To install t
+To install the package use
 ```{r eval=FALSE}
 install.packages("svgPanZoom")
 install.packages("svglite") # Needed for base
