@@ -45,7 +45,7 @@ data(mtcars, package="datasets")
 #install.packages("gridSVG")
 d = ggplot(mtcars, aes(mpg, disp, colour=disp)) + geom_jitter() + 
   theme_bw()
-#svgPanZoom(d, controlIconsEnabled = TRUE)
+svgPanZoom(d, controlIconsEnabled = TRUE)
 ```
 
 #### Links
